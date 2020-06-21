@@ -4,18 +4,28 @@
 
 #include "board.h"
 
+/* Tile */
+void tile::fill(char colour) {
+    this->img = colour;
+    if(colour != EMPTY) {
+        this->p1legal = false;
+        this->p2legal = false;
+        this->certain = true;
+    }
+}
+
 /* Constructors */
 Board::Board(int size_): size(size_) {
-    if(size < 8 || size % 2 != 0 || size > 26) throw bad_size(size_);
+    if(size_ < 8 || size_ % 2 != 0 || size_ > 26) throw bad_size(size_);
 
     this->size = size_;
 
-    this->board = std::vector<std::vector<char>>(size_, std::vector<char>(size_, EMPTY));
+    this->board = std::vector<std::vector<tile>>(size_, std::vector<tile>(size_));
 
-    this->board[size_ >> 1][size_ >> 1] = P2;
-    this->board[(size_ >> 1) - 1][(size_ >> 1) - 1] = P2;
-    this->board[size_ >> 1][(size_ >> 1) - 1] = P1;
-    this->board[(size_ >> 1) - 1][size_ >> 1] = P1;
+    this->board[size_ >> 1][size_ >> 1].img = P2;
+    this->board[(size_ >> 1) - 1][(size_ >> 1) - 1].img = P2;
+    this->board[size_ >> 1][(size_ >> 1) - 1].img = P1;
+    this->board[(size_ >> 1) - 1][size_ >> 1].img = P1;
 }
 
 /* Destructors */
@@ -28,18 +38,18 @@ Board::~Board() {
 // Inputs: row and column
 // Output: tile by reference
 // Getter and setter for a tile on the board
-char & Board::at(int row, int col) {
+tile & Board::at(int row, int col) {
     if(row < 0 || row >= this->size || col < 0 || col >= this->size) throw out_of_bounds(this->size, row, col);
     return this->board[row][col];
 }
-char Board::at(int row, int col) const {
+tile Board::at(int row, int col) const {
     if(row < 0 || row >= this->size || col < 0 || col >= this->size) throw out_of_bounds(this->size, row, col);
     return this->board[row][col];
 }
-char & Board::at(char row, char col) {
+tile & Board::at(char row, char col) {
     return this->at(tolower(row) - 'a', tolower(col) - 'a');
 }
-char Board::at(char row, char col) const {
+tile Board::at(char row, char col) const {
     return this->at(tolower(row) - 'a', tolower(col) - 'a');
 }
 
@@ -47,16 +57,22 @@ char Board::at(char row, char col) const {
 
 // Inputs: row and column
 // Output: true if row and col non-negative and less than size
-bool Board::inBounds(int row, int col) {
+bool Board::inBounds(int row, int col) const {
     return row >= 0 && col >= 0 && row < this->size && col < this->size;
 }
 
 // Prints the board
-void Board::print() {
+void Board::print() const {
     std::cout << *this;
 }
 
 /* Operator overloads */
+
+// Print a tile
+std::ostream& operator<<(std::ostream& os, const tile& t) {
+    os << t.img;
+    return os;
+}
 
 // Print board to the terminal
 std::ostream& operator<<(std::ostream& os, const Board& b) {

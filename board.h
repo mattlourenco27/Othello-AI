@@ -13,6 +13,14 @@
 #define P2 'W'
 #define EMPTY 'U'
 
+struct tile {
+    char img;
+    bool p1legal, p2legal, certain;
+
+    tile(): img('U'), p1legal(false), p2legal(false), certain(false) {}
+    void fill(char colour);
+};
+
 // Thrown when board initialization size is odd or less than 8 or greater than 26
 class bad_size: public std::exception {
     int size;
@@ -48,7 +56,7 @@ public:
 // Class to make access of the 2D board easier
 class Board {
     // board that stores the tiles
-    std::vector<std::vector<char>> board;
+    std::vector<std::vector<tile>> board;
 
     // size of one side of the square board, must be even
     unsigned size;
@@ -65,20 +73,23 @@ public:
     // Inputs: row and column
     // Output: tile by reference
     // Getter and setter for a tile on the board
-    char & at(int row, int col);
-    char & at(char row, char col);
+    tile & at(int row, int col);
+    tile & at(char row, char col);
     // Getter only variant
-    char at(int row, int col) const;
-    char at(char row, char col) const;
+    tile at(int row, int col) const;
+    tile at(char row, char col) const;
+
+    // getter for size
+    unsigned dim() const {return size;}
 
     /* Methods */
 
     // Inputs: row and column
     // Output: true if row and col non-negative and less than size
-    bool inBounds(int row, int col);
+    bool inBounds(int row, int col) const;
 
     // Prints the board
-    void print();
+    void print() const;
 
     /* Operator overloads */
 
