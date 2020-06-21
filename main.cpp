@@ -2,39 +2,13 @@
 // Created by Matthew Lourneco on 20/06/2020.
 //
 
-#include "Board.h"
+#include "board.h"
 
-//Prints the board along with coordinates of each tile
-void printBoard(char board[][26], int n) {
-    int i, j;
-
-    printf("  ");
-    for(i = 0; i < n; i++) {
-        printf("%c", 'a' + i);
-    }
-
-    printf("\n");
-
-    for(i = 0; i < n; i++) {
-        printf("%c ", 'a' + i);
-
-        for(j = 0; j < n; j++) {
-            printf("%c", board[i][j]);
-        }
-
-        printf("\n");
-    }
-}
-
-//Check if specific position is on the board of size n
-bool positionInBounds(int n, int row, int col) {
-    return row >= 0 && row < n && col >= 0 && col < n;
-}
+/*
 
 //Check if a piece can be placed in a certain tile and aim in a certain direction
 bool checkLegalInDirection(char board[][26], int n, int row, int col,
                            char colour, int deltaRow, int deltaCol) {
-    const char EMPTY = 'U';
 
     //Check for illegal input
     if(deltaRow == 0 && deltaCol == 0) return false;
@@ -79,7 +53,7 @@ bool evalMove(char board[][26], int n, int row, int col, char colour) {
     return false;
 }
 
-//This function checks if a valid move is avialble
+//This function checks if a valid move is available
 bool availableMove(char board[][26], int n, char colour) {
     int i, j;
 
@@ -137,33 +111,6 @@ int tileScore(char board[][26], int n, int row, int col, int colour) {
         }
     }
     return score;
-}
-
-//Prints the board along with coordinates of each tile
-void printBoard(char board[][26], int n) {
-    int i, j;
-
-    printf("  ");
-    for(i = 0; i < n; i++) {
-        printf("%c", 'a' + i);
-    }
-
-    printf("\n");
-
-    for(i = 0; i < n; i++) {
-        printf("%c ", 'a' + i);
-
-        for(j = 0; j < n; j++) {
-            printf("%c", board[i][j]);
-        }
-
-        printf("\n");
-    }
-}
-
-//Check if specific position is on the board of size n
-bool positionInBounds(int n, int row, int col) {
-    return row >= 0 && row < n && col >= 0 && col < n;
 }
 
 //Check if a piece can be placed in a certain tile and aim in a certain direction
@@ -510,45 +457,64 @@ void findBestMove(char board[][26], int n, char cpuColour, char aiColour, int *x
     free(score);
 }
 
+*/
+
 int main(int argc, char **argv)
 {
-    int n, i, j;
-    char board[26][26];
-    char cpuColour, userColour, newLine;
-    bool cpuTurn = false;
+    int n = 0;
+    Board *b = nullptr;
+    char player, cpu;
+    bool cpuTurn;
 
-    printf("Enter the board dimension: ");
-    scanf("%d", &n);
-
-    //Initialize the board
-    for(i = 0; i < n; i++) {
-        for(j = 0; j < n; j++) {
-            board[i][j] = 'U';
+    // Get board size
+    do {
+        std::cout << "Enter the board dimension: ";
+        std::cin >> n;
+        if(std::cin.fail()) std::cout << "Please enter an integer" << std::endl;
+        else {
+            try {
+                // Initialize the board
+                b = new Board(n);
+            } catch(bad_size& e) {
+                std::cout << e.what() << std::endl << "Size must be even and between 8 and 26" << std::endl;
+            } catch(std::exception& e) {
+                std::cout << e.what() << std::endl;
+                return EXIT_FAILURE;
+            }
         }
-    }
 
-    //Add starting tiles
-    board[n/2][n/2] = 'W';
-    board[n/2 - 1][n/2 - 1] = 'W';
-    board[n/2][n/2 - 1] = 'B';
-    board[n/2 - 1][n/2] = 'B';
+        std::cin.clear();
+        std::cin.ignore(INT_MAX, '\n');
+    } while(b == nullptr);
 
-    printf("Computer plays (B/W): ");
-    scanf("%c", &newLine); //Catch stray newline
-    scanf("%c", &cpuColour);
-    printBoard(board, n);
+    // Get player colour
+    do {
+        std::cout << "Choose your colour (B/W): ";
+        std::cin >> player;
+        player = toupper(player);
+        if(player == P1) {
+            cpu = P2;
+            cpuTurn = false;
+            break;
+        } else if(player == P2) {
+            cpu = P1;
+            cpuTurn = true;
+            break;
+        } else {
+            std::cout << "Please type 'B' or 'W'" << std::endl;
+        }
 
-    //Determine player to move first
-    if(cpuColour == 'B') {
-        cpuTurn = true;
-        userColour = 'W';
-    } else {
-        cpuTurn = false;
-        userColour = 'B';
-    }
+        std::cin.clear();
+        std::cin.ignore(INT_MAX, '\n');
+    } while(true);
+    std::cin.clear();
+    std::cin.ignore(INT_MAX, '\n');
 
-    int bestX, bestY;
-    char c1, c2;
+    // Initial print
+    std::cout << *b;
+    std::cout << "Board size: " << n << std::endl << "Player: " << player << std::endl << "cpu: " << cpu << std::endl;
+
+    /*
 
     while(availableMove(board, n, userColour) || availableMove(board, n, cpuColour)) {
         if(cpuTurn) {
@@ -617,127 +583,6 @@ int main(int argc, char **argv)
         printf("It's a tie.\n");
     }
     return 0;
-}
-
-int main(int argc, char **argv) {
-    int n, i, j;
-    char board[26][26];
-    char cpuColour, userColour, newLine;
-    bool cpuTurn = false;
-
-    printf("Enter the board dimension: ");
-    scanf("%d", &n);
-
-    //Initialize the board
-    for (i = 0; i < n; i++) {
-        for (j = 0; j < n; j++) {
-            board[i][j] = 'U';
-        }
-    }
-
-    //Add starting tiles
-    board[n / 2][n / 2] = 'W';
-    board[n / 2 - 1][n / 2 - 1] = 'W';
-    board[n / 2][n / 2 - 1] = 'B';
-    board[n / 2 - 1][n / 2] = 'B';
-
-    printf("Computer plays (B/W): ");
-    scanf("%c", &newLine); //Catch stray newline
-    scanf("%c", &cpuColour);
-    printBoard(board, n);
-
-    //Determine player to move first
-    if (cpuColour == 'B') {
-        cpuTurn = true;
-        userColour = 'W';
-    } else {
-        cpuTurn = false;
-        userColour = 'B';
-    }
-
-    int bestScore, bestX, bestY;
-    char c1, c2;
-
-    while (availableMove(board, n, userColour) || availableMove(board, n, cpuColour)) {
-        if (cpuTurn) {
-            //Initialize best score and co-ordinates
-            bestScore = 0;
-            bestX = 0;
-            bestY = 0;
-
-            //Find best score and co-ordinates
-            for (i = 0; i < n; i++) {
-                for (j = 0; j < n; j++) {
-                    if (tileScore(board, n, i, j, cpuColour) > bestScore) {
-                        bestScore = tileScore(board, n, i, j, cpuColour);
-                        bestX = i;
-                        bestY = j;
-                    }
-                }
-            }
-
-            //If Best score flips no tiles then the cpu cannot play
-            if (bestScore == 0) {
-                printf("%c player has no valid move.\n", cpuColour);
-            } else {
-                //Flip tiles for cpu
-                printf("Computer places %c at %c%c.\n", cpuColour, bestX + 'a', bestY + 'a');
-                flipTiles(board, n, bestX, bestY, cpuColour);
-                printBoard(board, n);
-            }
-
-        } else {
-            //First check if the player has a valid move
-            if (availableMove(board, n, userColour)) {
-
-                //Get user move
-                printf("Enter move for colour %c (RowCol): ", userColour);
-                scanf("%c", &newLine); //Catch stray newline
-                scanf("%c%c", &c1, &c2);
-
-                //Convert to x and y co-ordinates
-                i = c1 - 'a';
-                j = c2 - 'a';
-
-                //Find if the move is valid. Forfiet game if it is not valid
-                if (evalMove(board, n, i, j, userColour)) {
-                    //Flip tiles for user
-                    flipTiles(board, n, i, j, userColour);
-                    printBoard(board, n);
-                } else {
-                    printf("Invalid move.\n");
-                    break;
-                }
-            } else {
-                printf("%c player has no valid move.\n", userColour);
-            }
-
-        }
-
-        //Flip turn to other player
-        cpuTurn = !cpuTurn;
-    }
-
-    //Count tiles of each player
-    int B = 0, W = 0;
-
-    for (i = 0; i < n; i++) {
-        for (j = 0; j < n; j++) {
-            if (board[i][j] == 'B') {
-                B++;
-            } else if (board[i][j] == 'W') {
-                W++;
-            }
-        }
-    }
-
-    if (B > W) {
-        printf("B player wins.\n");
-    } else if (W > B) {
-        printf("W player wins.\n");
-    } else {
-        printf("It's a tie.\n");
-    }
-
-    return 0;
+    */
+    return EXIT_SUCCESS;
 }
