@@ -1,1 +1,1 @@
-# Othello
+# Reversii AI
