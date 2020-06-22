@@ -21,6 +21,7 @@ struct possibleFuture {
     scores *tileScore;
 
     possibleFuture(Board *b_, bool aiTurn_, scores *tileScore_): b(b_), aiTurn(aiTurn_), tileScore(tileScore_) {}
+    ~possibleFuture() {delete b;}
 };
 
 // AI that is restricted to one second of time to make decisions

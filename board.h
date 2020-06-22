@@ -59,11 +59,11 @@ class Board {
     std::vector<std::vector<tile>> board;
 
     // size of one side of the square board, must be even
-    unsigned size;
+    int size;
 
 public:
     /* Constructor */
-    Board(int _size);
+    explicit Board(int _size);
 
     /* Destructors */
     ~Board();
@@ -80,7 +80,7 @@ public:
     tile at(char row, char col) const;
 
     // getter for size
-    unsigned dim() const {return size;}
+    int dim() const {return size;}
 
     /* Methods */
 

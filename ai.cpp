@@ -3,6 +3,7 @@
 //
 
 #include "ai.h"
+#include <queue>
 
 /* Constructor */
 Ai::Ai(Board *b_, char role_): b(b_), role(role_) {
@@ -19,6 +20,10 @@ Ai::~Ai() {
 /* Methods */
 // Finds the best possible move in one second of time
 std::pair<int, int> Ai::findBestMove() {
+    std::queue<possibleFuture *> q;
+    Board *tmp;
+    possibleFuture *p;
+
     //Save start time
 
     // fill legalities
@@ -28,17 +33,71 @@ std::pair<int, int> Ai::findBestMove() {
     //begin check
     if(cornersAvailable(b, role)) {
         //Try taking all available corners
+        if(evalMove(b, 0, 0, role)) {
+            // try playing here
+            tmp = new Board(*b);
+            q.push(new possibleFuture(tmp, false, &data[0]));
+            // add flipped tile to score
+            data[0].my = flipTiles(tmp, 0, 0, role);
+
+            // Check time passed
+        }
+        if(evalMove(b, 0, b->dim() - 1, role)) {
+            // try playing here
+            tmp = new Board(*b);
+            q.push(new possibleFuture(tmp, false, &data[b->dim() - 1]));
+            // add flipped tile to score
+            data[b->dim() - 1].my = flipTiles(tmp, 0, b->dim() - 1, role);
+
+            // Check time passed
+        }
+        if(evalMove(b, b->dim() - 1, 0, role)) {
+            // try playing here
+            tmp = new Board(*b);
+            q.push(new possibleFuture(tmp, false, &data[(b->dim() - 1) * b->dim()]));
+            // add flipped tile to score
+            data[(b->dim() - 1) * b->dim()].my = flipTiles(tmp, b->dim() - 1, 0, role);
+
+            // Check time passed
+        }
+        if(evalMove(b, b->dim() - 1, b->dim() - 1, role)) {
+            // try playing here
+            tmp = new Board(*b);
+            q.push(new possibleFuture(tmp, false, &data[b->dim() * b->dim() - 1]));
+            // add flipped tile to score
+            data[b->dim() * b->dim() - 1].my = flipTiles(tmp, b->dim() - 1, b->dim() - 1, role);
+
+            // Check time passed
+        }
     } else {
         for (int row = 0; row < b->dim(); row++) {
             for (int col = 0; col < b->dim(); col++) {
                 // try all available moves
                 if(evalMove(b, row, col, role)) {
                     // try playing here
+                    tmp = new Board(*b);
+                    q.push(new possibleFuture(tmp, false, &data[row*b->dim() + col]));
                     // add flipped tile to score
+                    data[row*b->dim() + col].my = flipTiles(tmp, row, col, role);
 
-                    // queue to look ahead moves and count scores
+                    // Check time passed
                 }
             }
         }
     }
+
+    while(true) {
+        // evaluate each possible future and pursue further futures
+
+        // end the loop once too much time has passed
+    }
+
+    // clean possible futures
+    while(q.size()) {
+        p = q.front();
+        q.pop();
+        delete p;
+    }
+
+    // fine tile with desired score ratio and return its coordinates
 }

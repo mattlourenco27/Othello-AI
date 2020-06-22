@@ -28,8 +28,8 @@ bool evalMove(const Board *b, int row, int col, char colour);
 // calculates legality for all uncertain positions
 void fillLegalities(Board *b);
 
-// This function flips tiles in all valid directions
-void flipTiles(Board *b, int row, int col, char colour);
+// This function flips tiles in all valid directions and returns the number of tiles flipped
+int flipTiles(Board *b, int row, int col, char colour);
 
 // resets certainty on empty tiles
 void resetEmptyCertainty(Board *b);
