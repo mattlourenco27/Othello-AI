@@ -2,6 +2,7 @@
 // Created by Matthew Lourneco on 20/06/2020.
 //
 
+#include "ai.h"
 #include "board.h"
 #include "boardAnalysis.h"
 

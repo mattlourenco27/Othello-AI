@@ -62,7 +62,7 @@ class Board {
     unsigned size;
 
 public:
-    /* Constructors */
+    /* Constructor */
     Board(int _size);
 
     /* Destructors */

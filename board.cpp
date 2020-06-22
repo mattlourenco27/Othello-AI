@@ -14,7 +14,7 @@ void tile::fill(char colour) {
     }
 }
 
-/* Constructors */
+/* Constructor */
 Board::Board(int size_): size(size_) {
     if(size_ < 8 || size_ % 2 != 0 || size_ > 26) throw bad_size(size_);
 
