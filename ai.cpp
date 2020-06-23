@@ -28,11 +28,7 @@ std::pair<int, int> Ai::findBestMove() {
     //Save start time
     auto start = std::chrono::high_resolution_clock::now(), stop = start;
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
-    const double maxTime = 0.9;
-
-    // fill legalities
-    resetEmptyCertainty(b);
-    fillLegalities(b);
+    const double maxTime = 1000;
 
     //begin check
     if(cornersAvailable(b, role)) {
@@ -173,6 +169,9 @@ std::pair<int, int> Ai::findBestMove() {
             diff = data[best].my - data[best].op;
         }
     }
+
+    // clear scores
+    data = std::vector<scores>(b->dim() * b->dim());
 
     return std::make_pair(best / b->dim(), best % b->dim());
 }

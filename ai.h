@@ -39,7 +39,7 @@ public:
 
     /* Methods */
     // Finds the best possible move in one second of time
-    std::pair<int, int> findBestMove()
+    std::pair<int, int> findBestMove();
 };
 
 

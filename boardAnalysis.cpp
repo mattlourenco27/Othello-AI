@@ -142,7 +142,7 @@ int flipTiles(Board *b, int row, int col, char colour) {
     }
 
     //Place new tile
-    b->at(scanRow, scanCol).fill(colour);
+    b->at(row, col).fill(colour);
     resetEmptyCertainty(b);
     return score;
 }

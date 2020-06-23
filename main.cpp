@@ -61,75 +61,65 @@ int main(int argc, char **argv)
     std::cout << *b;
     std::cout << "Board size: " << n << std::endl << "Player: " << player << std::endl << "cpu: " << cpu << std::endl;
 
-    /*
+    // Create the ai
+    Ai ai(b, cpu);
 
-    while(availableMove(board, n, userColour) || availableMove(board, n, cpuColour)) {
+    fillLegalities(b);
+    while(availableMove(b, player) || availableMove(b, cpu)) {
         if(cpuTurn) {
             //First check if the computer has a valid move
-            if(availableMove(board, n, cpuColour)) {
-                bestX = 0;
-                bestY = 0;
-
-                struct rusage usage; // a structure to hold "resource usage" (including time)
-                struct timeval start; // will hold the start and end times
-                getrusage(RUSAGE_SELF, &usage);
-                start = usage.ru_utime;
-                double timeStart = start.tv_sec + start.tv_usec / 1000000.0; // in seconds
-
-                // PLACE THE CODE YOU WISH TO TIME HERE
-
-                findBestMove(board, n, cpuColour, userColour, &bestX, &bestY, timeStart);
+            if(availableMove(b, cpu)) {
+                std::pair<int, int> best;
+                best = ai.findBestMove();
 
                 //Flip tiles for cpu
-                printf("Computer places %c at %c%c.\n", cpuColour, bestX + 'a', bestY + 'a');
-                flipTiles(board, n, bestX, bestY, cpuColour);
-                printBoard(board, n);
+                std::cout << "Computer places " << cpu << " at " << (char)(best.first + 'a') << (char)(best.second + 'a') << ".\n";
+                flipTiles(b, best.first, best.second, cpu);
+                std::cout << *b;
             } else {
-                printf("%c player has no valid move.\n", cpuColour);
+                std::cout << cpu << " player has no valid move.\n";
             }
         } else {
             //First check if the user has a valid move
-            if(availableMove(board, n, userColour)) {
-
+            if(availableMove(b, player)) {
+                char row, col;
                 //Get user move
-                printf("Enter move for colour %c (RowCol): ", userColour);
-                scanf("%c", &newLine); //Catch stray newline
-                scanf("%c%c", &c1, &c2);
+                do {
+                    std::cout << "Enter move for colour " << player << " (RowCol): ";
+                    std::cin >> row >> col;
 
-                //Convert to x and y co-ordinates
-                i = c1 - 'a';
-                j = c2 - 'a';
-
-                //Find if the move is valid. Forfiet game if it is not valid
-                if(evalMove(board, n, i, j, userColour)) {
-                    //Flip tiles for user
-                    flipTiles(board, n, i, j, userColour);
-                    printBoard(board, n);
-                } else {
-                    printf("Invalid move.\n");
-                    break;
-                }
+                    //Find if the move is valid. Forfiet game if it is not valid
+                    if(evalMove(b, row - 'a', col - 'a', player)) {
+                        //Flip tiles for user
+                        flipTiles(b, row - 'a', col - 'a', player);
+                        std::cout << *b;
+                        break;
+                    } else {
+                        printf("Invalid move.\n");
+                    }
+                } while(true);
             } else {
-                printf("%c player has no valid move.\n", userColour);
+                std::cout << player << " player has no valid move.\n";
             }
         }
 
         //Flip turn to other player
         cpuTurn = !cpuTurn;
+        fillLegalities(b);
     }
 
     //Count tiles of each player
-    int B = countColour(board, n, 'B');
-    int W = countColour(board, n, 'W');
+    int B = countColour(b, P1);
+    int W = countColour(b, P2);
 
     if(B > W) {
-        printf("B player wins.\n");
+        std::cout << "B player wins.\n";
     } else if(W > B){
-        printf("W player wins.\n");
+        std::cout << "W player wins.\n";
     } else {
-        printf("It's a tie.\n");
+        std::cout << "It's a tie.\n";
     }
-    return 0;
-    */
+
+    delete b;
     return EXIT_SUCCESS;
 }

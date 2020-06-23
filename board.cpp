@@ -22,10 +22,10 @@ Board::Board(int size_): size(size_) {
 
     this->board = std::vector<std::vector<tile>>(size_, std::vector<tile>(size_));
 
-    this->board[size_ >> 1][size_ >> 1].img = P2;
-    this->board[(size_ >> 1) - 1][(size_ >> 1) - 1].img = P2;
-    this->board[size_ >> 1][(size_ >> 1) - 1].img = P1;
-    this->board[(size_ >> 1) - 1][size_ >> 1].img = P1;
+    this->board[size_ >> 1][size_ >> 1].fill(P2);
+    this->board[(size_ >> 1) - 1][(size_ >> 1) - 1].fill(P2);
+    this->board[size_ >> 1][(size_ >> 1) - 1].fill(P1);
+    this->board[(size_ >> 1) - 1][size_ >> 1].fill(P1);
 }
 
 /* Destructors */
