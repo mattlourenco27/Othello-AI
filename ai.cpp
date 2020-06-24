@@ -25,6 +25,10 @@ std::pair<int, int> Ai::findBestMove() {
     Board *tmp;
     possibleFuture *p;
 
+    // clear scores
+    data.clear();
+    data = std::vector<scores>(b->dim() * b->dim());
+
     //Save start time
     auto start = std::chrono::high_resolution_clock::now(), stop = start;
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
@@ -169,9 +173,6 @@ std::pair<int, int> Ai::findBestMove() {
             diff = data[best].my - data[best].op;
         }
     }
-
-    // clear scores
-    data = std::vector<scores>(b->dim() * b->dim());
 
     return std::make_pair(best / b->dim(), best % b->dim());
 }

@@ -72,6 +72,10 @@ int main(int argc, char **argv)
                 std::pair<int, int> best;
                 best = ai.findBestMove();
 
+                if(!evalMove(b, best.first, best.second, cpu)) {
+                    std::cout << "CPU made an illegal move" << std::endl;
+                }
+
                 //Flip tiles for cpu
                 std::cout << "Computer places " << cpu << " at " << (char)(best.first + 'a') << (char)(best.second + 'a') << ".\n";
                 flipTiles(b, best.first, best.second, cpu);
@@ -120,6 +124,7 @@ int main(int argc, char **argv)
         std::cout << "It's a tie.\n";
     }
 
+    std::cin >> player;
     delete b;
     return EXIT_SUCCESS;
 }
