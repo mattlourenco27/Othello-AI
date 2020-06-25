@@ -5,6 +5,7 @@
 #include "ai.h"
 #include "board.h"
 #include "boardAnalysis.h"
+#include <limits.h>
 
 int main(int argc, char **argv)
 {
@@ -64,7 +65,7 @@ int main(int argc, char **argv)
     // Create the ai
     Ai ai(b, cpu);
 
-    fillLegalities(b);
+    // Game loop
     while(availableMove(b, player) || availableMove(b, cpu)) {
         if(cpuTurn) {
             //First check if the computer has a valid move
@@ -92,7 +93,7 @@ int main(int argc, char **argv)
                     std::cout << "Enter move for colour " << player << " (RowCol): ";
                     std::cin >> row >> col;
 
-                    //Find if the move is valid. Forfiet game if it is not valid
+                    // Find if the move is valid
                     if(evalMove(b, row - 'a', col - 'a', player)) {
                         //Flip tiles for user
                         flipTiles(b, row - 'a', col - 'a', player);
@@ -109,7 +110,6 @@ int main(int argc, char **argv)
 
         //Flip turn to other player
         cpuTurn = !cpuTurn;
-        fillLegalities(b);
     }
 
     //Count tiles of each player

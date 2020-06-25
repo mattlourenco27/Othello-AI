@@ -32,29 +32,25 @@ bool checkLegalInDirection(const Board *b, int row, int col, char colour, int de
     //Check for illegal input
     if(deltaRow == 0 && deltaCol == 0) return false;
     if(!b->inBounds(row, col)) return false;
-    if(b->at(row, col).img != EMPTY) return false;
+    if(b->at(row, col) != EMPTY) return false;
 
     //Check that next tile is the opposite colour
     row += deltaRow;
     col += deltaCol;
     if(!b->inBounds(row, col)) return false;
-    if(b->at(row, col).img == EMPTY || b->at(row, col).img == colour) return false;
+    if(b->at(row, col) == EMPTY || b->at(row, col) == colour) return false;
 
     //Check that the line ends in the same colour
-    do {
-        row += deltaRow;
-        col += deltaCol;
-        if(!b->inBounds(row, col)) return false;
+    try {
+        do {
+            row += deltaRow;
+            col += deltaCol;
+        } while(b->at(row, col) != colour && b->at(row, col) != EMPTY);
+    } catch(out_of_bounds & e) { // line continued off of the board
+        return false;
+    }
 
-    } while(b->at(row, col).img != colour && b->at(row, col).img != EMPTY);
-
-    return b->at(row, col).img == colour;
-}
-
-// This function checks if there is a move available in the corners
-bool cornersAvailable(const Board *b, char colour) {
-    return evalMove(b, 0, 0, colour) || evalMove(b, 0, b->dim() - 1, colour) ||
-           evalMove(b, b->dim() - 1, 0, colour) || evalMove(b, b->dim() - 1, b->dim() - 1, colour);
+    return b->at(row, col) == colour;
 }
 
 // This function counts the number of tiles of a specific colour
@@ -63,7 +59,7 @@ int countColour(const Board *b, char colour) {
 
     for(int i = 0; i < b->dim(); i++) {
         for(int j = 0; j < b->dim(); j++) {
-            if(b->at(i, j).img == colour) {
+            if(b->at(i, j) == colour) {
                 tiles++;
             }
         }
@@ -76,15 +72,7 @@ int countColour(const Board *b, char colour) {
 bool evalMove(const Board *b, int row, int col, char colour) {
     //Check for valid position
     if(!b->inBounds(row, col)) return false;
-
-    if(b->at(row, col).certain) {
-        if(colour == P1) return b->at(row, col).p1legal;
-        else if(colour == P2) return b->at(row, col).p2legal;
-        else return false;
-    }
-
-    // Uncertain, calculate legality
-    if(b->at(row, col).img != EMPTY) return false;
+    if(b->at(row, col) != EMPTY) return false;
 
     //Check that the move is valid in at least one direction
     for(int deltaRow = -1; deltaRow <= 1; deltaRow++) {
@@ -95,29 +83,6 @@ bool evalMove(const Board *b, int row, int col, char colour) {
         }
     }
     return false;
-}
-
-// calculates legality for all uncertain positions
-void fillLegalities(Board *b) {
-    bool p1legal, p2legal;
-    for(int row = 0; row < b->dim(); row++) {
-        for(int col = 0; col < b->dim(); col++) {
-            if(!b->at(row, col).certain) {
-                p1legal = false;
-                p2legal = false;
-                for(int drow = -1; drow <= 1; drow++) {
-                    for(int dcol = -1; dcol <= 1; dcol++) {
-                        if(!p1legal) p1legal = checkLegalInDirection(b, row, col, P1, drow, dcol);
-                        if(!p2legal) p2legal = checkLegalInDirection(b, row, col, P2, drow, dcol);
-                    }
-                }
-
-                b->at(row, col).certain = true;
-                b->at(row, col).p1legal = p1legal;
-                b->at(row, col).p2legal = p2legal;
-            }
-        }
-    }
 }
 
 // This function flips tiles in all valid directions and returns the number of tiles flipped
@@ -132,30 +97,18 @@ int flipTiles(Board *b, int row, int col, char colour) {
                 scanRow = row + deltaRow;
                 scanCol = col + deltaCol;
                 do {
-                    b->at(scanRow, scanCol).fill(colour);
+                    b->at(scanRow, scanCol) = colour;
                     score++;
                     scanRow += deltaRow;
                     scanCol += deltaCol;
-                } while(b->at(scanRow, scanCol).img != colour);
+                } while(b->at(scanRow, scanCol) != colour);
             }
         }
     }
 
     //Place new tile
-    b->at(row, col).fill(colour);
-    resetEmptyCertainty(b);
+    b->at(row, col) = colour;
     return score;
-}
-
-// resets certainty on empty tiles
-void resetEmptyCertainty(Board *b) {
-    for(int row = 0; row < b->dim(); row++) {
-        for(int col = 0; col < b->dim(); col++) {
-            if(b->at(row, col).img == EMPTY) {
-                b->at(row, col).certain = false;
-            }
-        }
-    }
 }
 
 // This function calculates the number of tiles that can be flipped from a position
@@ -164,7 +117,7 @@ int tileScore(const Board *b, int row, int col, char colour) {
 
     // Check for illegal input
     if(!b->inBounds(row, col)) return 0;
-    if(b->at(row, col).img != EMPTY) return 0;
+    if(b->at(row, col) != EMPTY) return 0;
 
     for(int deltaRow = -1; deltaRow <= 1; deltaRow++) {
         for(int deltaCol = -1; deltaCol <= 1; deltaCol++) {
@@ -174,20 +127,22 @@ int tileScore(const Board *b, int row, int col, char colour) {
             scanRow = row + deltaRow;
             scanCol = col + deltaCol;
             if(!b->inBounds(scanRow, scanCol)) continue;
-            if(b->at(scanRow, scanCol).img == EMPTY || b->at(scanRow, scanCol).img == colour) continue;
+            if(b->at(scanRow, scanCol) == EMPTY || b->at(scanRow, scanCol) == colour) continue;
 
             addition = 0;
 
             // Check that the line ends in the same colour
-            do {
-                addition++;
-                scanRow += deltaRow;
-                scanCol += deltaCol;
-                if(!b->inBounds(scanRow, scanCol)) continue;
+            try {
+                do {
+                    addition++;
+                    scanRow += deltaRow;
+                    scanCol += deltaCol;
+                } while (b->at(scanRow, scanCol) != colour && b->at(scanRow, scanCol) != EMPTY);
+            } catch (out_of_bounds & e) {
+                continue;
+            }
 
-            } while(b->at(scanRow, scanCol).img != colour && b->at(scanRow, scanCol).img != EMPTY);
-
-            if(b->at(scanRow, scanCol).img == colour) score += addition;
+            if(b->at(scanRow, scanCol) == colour) score += addition;
         }
     }
 
