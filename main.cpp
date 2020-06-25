@@ -123,6 +123,7 @@ int main(int argc, char **argv)
     } else {
         std::cout << "It's a tie.\n";
     }
+    std::cout << "B: " << B << " W: " << W << std::endl;
 
     std::cin >> player;
     delete b;
