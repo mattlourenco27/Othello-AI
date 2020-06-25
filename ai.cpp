@@ -6,6 +6,11 @@
 #include <chrono>
 #include <queue>
 
+std::ostream& operator<<(std::ostream& os, const scores& s) {
+    os << "{" << s.my << ", " << s.op << "}";
+    return os;
+}
+
 /* Constructor */
 Ai::Ai(Board *b_, char role_): b(b_), aiRole(role_), opRole((role_ == P1)? P2: P1) {
     data = std::vector<scores>(b->dim() * b->dim());
@@ -173,32 +178,35 @@ std::pair<int, int> Ai::findBestMove() {
     }
 
     // find tile with desired score ratio and return its coordinates
-    int best = -1, diff, i = 0;
+    int best, diff, i = 0;
 
     //find the first valid move
-    while(best == -1) {
+    while(true) {
         if(data[i].my > 0) {
             best = i;
             diff = data[best].my - data[best].op;
+            break;
         }
         i++;
         if(i == data.size()) throw no_generation();
     }
 
-    for(; i < data.size(); i++) {
-        if(data[i].my - data[i].op > diff) {
+    // std::cout << "best is init at " << best << " with diff " << diff << std::endl;
+
+    for(i += 1; i < data.size(); i++) {
+        if(data[i].my > 0 && data[i].my - data[i].op > diff) {
             best = i;
             diff = data[best].my - data[best].op;
         }
     }
 
     // print data
-    std::cout << "[";
-    for(int d = 0; d < data.size(); d++) {
-        std::cout << data[d];
-        if(d + 1 != data.size()) std::cout << ", ";
-    }
-    std::cout << "]" << std::endl;
-    std::cout << "The best solution was at data " << best << std::endl;
+    // std::cout << "[";
+    // for(int d = 0; d < data.size(); d++) {
+    //  std::cout << data[d];
+    //  if(d + 1 != data.size()) std::cout << ", ";
+    // }
+    // std::cout << "]" << std::endl;
+    // std::cout << "The best solution was at data " << best << std::endl;
     return std::make_pair(best / b->dim(), best % b->dim());
 }

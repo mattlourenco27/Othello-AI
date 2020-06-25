@@ -26,11 +26,6 @@ struct scores {
     scores(): my(0), op(0) {}
 };
 
-std::ostream& operator<<(std::ostream& os, const scores& s) {
-    os << "{" << s.my << ", " << s.op << "}";
-    return os;
-}
-
 struct possibleFuture {
     const Board *const b;
     const bool aiTurn;

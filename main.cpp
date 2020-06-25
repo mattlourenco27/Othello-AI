@@ -60,7 +60,7 @@ int main(int argc, char **argv)
 
     // Initial print
     std::cout << *b;
-    std::cout << "Board size: " << n << std::endl << "Player: " << player << std::endl << "cpu: " << cpu << std::endl;
+    // std::cout << "Board size: " << n << std::endl << "Player: " << player << std::endl << "cpu: " << cpu << std::endl;
 
     // Create the ai
     Ai ai(b, cpu);
