@@ -5,7 +5,7 @@
 #include "ai.h"
 #include "board.h"
 #include "boardAnalysis.h"
-#include <limits.h>
+#include <climits>
 
 int main(int argc, char **argv)
 {
