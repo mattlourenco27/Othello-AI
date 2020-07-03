@@ -32,20 +32,20 @@ bool checkLegalInDirection(const Board *b, int row, int col, char colour, int de
     //Check for illegal input
     if(deltaRow == 0 && deltaCol == 0) return false;
     if(!b->inBounds(row, col)) return false;
-    if(b->at(row, col) != EMPTY) return false;
+    if(b->at(row, col) != EMPTY_SPACE) return false;
 
     //Check that next tile is the opposite colour
     row += deltaRow;
     col += deltaCol;
     if(!b->inBounds(row, col)) return false;
-    if(b->at(row, col) == EMPTY || b->at(row, col) == colour) return false;
+    if(b->at(row, col) == EMPTY_SPACE || b->at(row, col) == colour) return false;
 
     //Check that the line ends in the same colour
     try {
         do {
             row += deltaRow;
             col += deltaCol;
-        } while(b->at(row, col) != colour && b->at(row, col) != EMPTY);
+        } while(b->at(row, col) != colour && b->at(row, col) != EMPTY_SPACE);
     } catch(out_of_bounds & e) { // line continued off of the board
         return false;
     }
@@ -72,7 +72,7 @@ int countColour(const Board *b, char colour) {
 bool evalMove(const Board *b, int row, int col, char colour) {
     //Check for valid position
     if(!b->inBounds(row, col)) return false;
-    if(b->at(row, col) != EMPTY) return false;
+    if(b->at(row, col) != EMPTY_SPACE) return false;
 
     //Check that the move is valid in at least one direction
     for(int deltaRow = -1; deltaRow <= 1; deltaRow++) {
@@ -117,7 +117,7 @@ int tileScore(const Board *b, int row, int col, char colour) {
 
     // Check for illegal input
     if(!b->inBounds(row, col)) return 0;
-    if(b->at(row, col) != EMPTY) return 0;
+    if(b->at(row, col) != EMPTY_SPACE) return 0;
 
     for(int deltaRow = -1; deltaRow <= 1; deltaRow++) {
         for(int deltaCol = -1; deltaCol <= 1; deltaCol++) {
@@ -127,7 +127,7 @@ int tileScore(const Board *b, int row, int col, char colour) {
             scanRow = row + deltaRow;
             scanCol = col + deltaCol;
             if(!b->inBounds(scanRow, scanCol)) continue;
-            if(b->at(scanRow, scanCol) == EMPTY || b->at(scanRow, scanCol) == colour) continue;
+            if(b->at(scanRow, scanCol) == EMPTY_SPACE || b->at(scanRow, scanCol) == colour) continue;
 
             addition = 0;
 
@@ -137,7 +137,7 @@ int tileScore(const Board *b, int row, int col, char colour) {
                     addition++;
                     scanRow += deltaRow;
                     scanCol += deltaCol;
-                } while (b->at(scanRow, scanCol) != colour && b->at(scanRow, scanCol) != EMPTY);
+                } while (b->at(scanRow, scanCol) != colour && b->at(scanRow, scanCol) != EMPTY_SPACE);
             } catch (out_of_bounds & e) {
                 continue;
             }

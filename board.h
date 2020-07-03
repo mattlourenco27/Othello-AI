@@ -11,7 +11,7 @@
 
 #define P1 'B'
 #define P2 'W'
-#define EMPTY 'U'
+#define EMPTY_SPACE 'U'
 
 // Thrown when board initialization size is odd or less than 8 or greater than 26
 class bad_size: public std::exception {

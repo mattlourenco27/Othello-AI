@@ -10,7 +10,7 @@ Board::Board(int size_): size(size_) {
 
     this->size = size_;
 
-    this->board = std::vector<std::vector<char>>(size_, std::vector<char>(size_, EMPTY));
+    this->board = std::vector<std::vector<char>>(size_, std::vector<char>(size_, EMPTY_SPACE));
 
     this->board[size_ >> 1][size_ >> 1] = P2;
     this->board[(size_ >> 1) - 1][(size_ >> 1) - 1] = P2;
