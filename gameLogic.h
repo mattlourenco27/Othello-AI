@@ -5,24 +5,35 @@
 #ifndef REVERSII_GAMELOGIC_H
 #define REVERSII_GAMELOGIC_H
 
+#include "board.h"
 #include <gtkmm.h>
 
-namespace glc {
+class GameLogic {
+    // board size
+    int b_size;
+
+    // board object pointer
+    Board* b;
+
+public:
+    /* Constructor */
+    // finish construction of the window and connect signals
+    explicit GameLogic(const Glib::RefPtr<Gtk::Builder> & refBuilder);
+
+    /* Destructor */
+    ~GameLogic();
+
     // app window
-    extern Gtk::Window* pWindow;
+    Gtk::Window* pWindow;
 
     // start the game
     int begin();
 
-    // clean up instantiated window
-    void clean();
-    void draw_background();
+    // drawing area override function
+    bool draw(const Cairo::RefPtr<Cairo::Context> &cr, Gtk::DrawingArea *pArea);
 
     // delete the window
     void on_quit_clicked();
-
-    // finish construction of the window and connect signals
-    void set_up(const Glib::RefPtr<Gtk::Builder> & refBuilder);
-}
+};
 
 #endif //REVERSII_GAMELOGIC_H

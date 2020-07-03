@@ -27,12 +27,12 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
 
-    glc::set_up(refBuilder);
-    //glc::begin();
-    
-    if(glc::pWindow) {
-        exit_state = app->run(*glc::pWindow);
-        glc::clean();
+    // finish construction and signal connection
+    GameLogic gameL(refBuilder);
+
+    if(gameL.pWindow) {
+        // enter application loop
+        exit_state = app->run(*gameL.pWindow);
     }
 
     return exit_state;
