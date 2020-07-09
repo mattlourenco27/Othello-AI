@@ -5,7 +5,6 @@
 #include "ai.h"
 #include "boardAnalysis.h"
 #include <cairomm/context.h>
-#include <climits>
 #include "gameLogic.h"
 
 /* Constructor */
@@ -16,6 +15,15 @@ GameLogic::GameLogic(const Glib::RefPtr<Gtk::Builder> &refBuilder) {
 
     // set up the game board for the first time
     b = new Board(b_size);
+
+    // set up ghost chips
+    ghostChips = std::vector<plegal>(b_size * b_size);
+    fillGhosts();
+
+    // when the app launches the player is P1 by default
+    player = P1;
+    cpu = P2;
+    cpuTurn = false;
 
     // get the window
     refBuilder->get_widget("app_window", pWindow);
@@ -36,39 +44,26 @@ GameLogic::GameLogic(const Glib::RefPtr<Gtk::Builder> &refBuilder) {
 /* Destructor */
 GameLogic::~GameLogic() {
     delete pWindow;
+    delete b;
+}
+
+// return a pointer to the window
+Gtk::Window* GameLogic::window() {
+    return pWindow;
+}
+
+// fills the ghost chips by determining legal moves for each player
+void GameLogic::fillGhosts() {
+    for(int row = 0; row < b_size; row++) {
+        for(int col = 0; col < b_size; col++) {
+            ghostChips[row * b_size + col].p1legal = evalMove(b, row, col, P1);
+            ghostChips[row * b_size + col].p2legal = evalMove(b, row, col, P2);
+        }
+    }
 }
 
 // start the game
 int GameLogic::begin() {
-    char player, cpu;
-    bool cpuTurn;
-
-    // Get player colour
-    do {
-        std::cout << "Choose your colour (B/W): ";
-        std::cin >> player;
-        player = toupper(player);
-        if(player == P1) {
-            cpu = P2;
-            cpuTurn = false;
-            break;
-        } else if(player == P2) {
-            cpu = P1;
-            cpuTurn = true;
-            break;
-        } else {
-            std::cout << "Please type 'B' or 'W'" << std::endl;
-        }
-
-        std::cin.clear();
-        std::cin.ignore(INT_MAX, '\n');
-    } while(true);
-    std::cin.clear();
-    std::cin.ignore(INT_MAX, '\n');
-
-    // Initial print
-    std::cout << *b;
-    // std::cout << "Board size: " << n << std::endl << "Player: " << player << std::endl << "cpu: " << cpu << std::endl;
 
     // Create the ai
     Ai ai(b, cpu);
@@ -134,7 +129,6 @@ int GameLogic::begin() {
     std::cout << "B: " << B << " W: " << W << std::endl;
 
     std::cin >> player;
-    delete b;
     return EXIT_SUCCESS;
 }
 
@@ -183,6 +177,7 @@ bool GameLogic::draw(const Cairo::RefPtr<Cairo::Context> &cr, Gtk::DrawingArea *
     // draw the pieces
     cr->save();
     cr->set_line_width(1.0);
+    bool p1turn = !(cpuTurn ^ (cpu == P1));
     for(int row = 0; row < b_size; row++) {
         for(int col = 0; col < b_size; col++) {
             char img = b->at(row, col);
@@ -193,6 +188,16 @@ bool GameLogic::draw(const Cairo::RefPtr<Cairo::Context> &cr, Gtk::DrawingArea *
             }
             if(img == P2) {
                 cr->set_source_rgb(1.0, 1.0, 1.0);
+                cr->arc((col + 0.5) * col_width, (row + 0.5) * row_height, col_width * 0.4, 0, 2 * M_PI);
+                cr->fill();
+            }
+            if(ghostChips[b_size * row + col].p1legal && p1turn) {
+                cr->set_source_rgba(0, 0, 0, 0.2);
+                cr->arc((col + 0.5) * col_width, (row + 0.5) * row_height, col_width * 0.4, 0, 2 * M_PI);
+                cr->fill();
+            }
+            if(ghostChips[b_size * row + col].p2legal && !p1turn) {
+                cr->set_source_rgba(1.0, 1.0, 1.0, 0.2);
                 cr->arc((col + 0.5) * col_width, (row + 0.5) * row_height, col_width * 0.4, 0, 2 * M_PI);
                 cr->fill();
             }

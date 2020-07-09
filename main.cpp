@@ -30,9 +30,9 @@ int main(int argc, char **argv) {
     // finish construction and signal connection
     GameLogic gameL(refBuilder);
 
-    if(gameL.pWindow) {
+    if(gameL.window()) {
         // enter application loop
-        exit_state = app->run(*gameL.pWindow);
+        exit_state = app->run(*gameL.window());
     }
 
     return exit_state;

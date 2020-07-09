@@ -8,12 +8,30 @@
 #include "board.h"
 #include <gtkmm.h>
 
+struct plegal {
+    bool p1legal, p2legal;
+
+    plegal(): p1legal(false), p2legal(false) {}
+};
+
 class GameLogic {
+    // app window
+    Gtk::Window* pWindow;
+
     // board size
     int b_size;
 
     // board object pointer
     Board* b;
+
+    // colours representing each player
+    char player, cpu;
+
+    // turn tracker
+    bool cpuTurn;
+
+    // legal move tracker
+    std::vector<plegal> ghostChips;
 
 public:
     /* Constructor */
@@ -23,8 +41,11 @@ public:
     /* Destructor */
     ~GameLogic();
 
-    // app window
-    Gtk::Window* pWindow;
+    // return a pointer to the window
+    Gtk::Window* window();
+
+    // fills the ghost chips by determining legal moves for each player
+    void fillGhosts();
 
     // start the game
     int begin();
