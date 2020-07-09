@@ -2,28 +2,24 @@
 // Created by Matthew Lourenco on 03/07/2020.
 //
 
-#include "ai.h"
 #include "boardAnalysis.h"
 #include <cairomm/context.h>
 #include "gameLogic.h"
 
 /* Constructor */
 // finish construction of the window and connect signals
-GameLogic::GameLogic(const Glib::RefPtr<Gtk::Builder> &refBuilder) {
-    pWindow = nullptr;
-    b_size = 8;
-
-    // set up the game board for the first time
-    b = new Board(b_size);
-
+GameLogic::GameLogic(const Glib::RefPtr<Gtk::Builder> &refBuilder):
+    pWindow(nullptr),
+    b_size(8),
+    b(new Board(b_size)),
+    ghostChips(b_size * b_size),
+    player(P1), // when the app launches the player is P1 by default
+    cpu(P2),
+    cpuTurn(false),
+    ai(b, P2)
+{
     // set up ghost chips
-    ghostChips = std::vector<plegal>(b_size * b_size);
     fillGhosts();
-
-    // when the app launches the player is P1 by default
-    player = P1;
-    cpu = P2;
-    cpuTurn = false;
 
     // get the window
     refBuilder->get_widget("app_window", pWindow);
@@ -36,7 +32,11 @@ GameLogic::GameLogic(const Glib::RefPtr<Gtk::Builder> &refBuilder) {
         // draw the game board
         Gtk::DrawingArea* pArea = nullptr;
         refBuilder->get_widget("game_board", pArea);
-        if(pArea) pArea->signal_draw().connect(sigc::bind (sigc::mem_fun (*this, &GameLogic::draw), pArea));
+        if(pArea) {
+            pArea->signal_draw().connect(sigc::bind(sigc::mem_fun(*this, &GameLogic::draw), pArea));
+            pArea->add_events(Gdk::BUTTON_PRESS_MASK);
+            pArea->signal_button_press_event().connect(sigc::bind(sigc::mem_fun(*this, &GameLogic::on_drawing_area_pressed), pArea));
+        }
 
     }
 }
@@ -45,6 +45,7 @@ GameLogic::GameLogic(const Glib::RefPtr<Gtk::Builder> &refBuilder) {
 GameLogic::~GameLogic() {
     delete pWindow;
     delete b;
+    ghostChips.clear();
 }
 
 // return a pointer to the window
@@ -64,56 +65,6 @@ void GameLogic::fillGhosts() {
 
 // start the game
 int GameLogic::begin() {
-
-    // Create the ai
-    Ai ai(b, cpu);
-
-    // Game loop
-    while(availableMove(b, player) || availableMove(b, cpu)) {
-        if(cpuTurn) {
-            //First check if the computer has a valid move
-            if(availableMove(b, cpu)) {
-                std::pair<int, int> best;
-                best = ai.findBestMove();
-
-                if(!evalMove(b, best.first, best.second, cpu)) {
-                    std::cout << "CPU made an illegal move" << std::endl;
-                }
-
-                //Flip tiles for cpu
-                std::cout << "Computer places " << cpu << " at " << (char)(best.first + 'a') << (char)(best.second + 'a') << ".\n";
-                flipTiles(b, best.first, best.second, cpu);
-                std::cout << *b;
-            } else {
-                std::cout << cpu << " player has no valid move.\n";
-            }
-        } else {
-            //First check if the user has a valid move
-            if(availableMove(b, player)) {
-                char row, col;
-                //Get user move
-                do {
-                    std::cout << "Enter move for colour " << player << " (RowCol): ";
-                    std::cin >> row >> col;
-
-                    // Find if the move is valid
-                    if(evalMove(b, row - 'a', col - 'a', player)) {
-                        //Flip tiles for user
-                        flipTiles(b, row - 'a', col - 'a', player);
-                        std::cout << *b;
-                        break;
-                    } else {
-                        printf("Invalid move.\n");
-                    }
-                } while(true);
-            } else {
-                std::cout << player << " player has no valid move.\n";
-            }
-        }
-
-        //Flip turn to other player
-        cpuTurn = !cpuTurn;
-    }
 
     //Count tiles of each player
     int B = countColour(b, P1);
@@ -204,6 +155,47 @@ bool GameLogic::draw(const Cairo::RefPtr<Cairo::Context> &cr, Gtk::DrawingArea *
         }
     }
     cr->restore();
+
+    return true;
+}
+
+// handler for the ai's turn
+bool GameLogic::do_ai_turn(Gtk::DrawingArea *pArea) {
+    if(!cpuTurn) return false;
+
+    // drawing area must be redrawn in all cases forward
+    pArea->queue_draw();
+
+    if(!availableMove(b, cpu)) { // cpu has no move, show possible player moves instead
+        cpuTurn = false;
+        return false;
+    }
+
+    // choose best move and flip tiles for cpu
+    std::pair<int, int> best = ai.findBestMove();
+    flipTiles(b, best.first, best.second, cpu);
+    fillGhosts();
+
+    cpuTurn = !availableMove(b, player) && availableMove(b, cpu);
+    return cpuTurn; // on return true timeout continues
+}
+
+// handler for press of the drawing area
+bool GameLogic::on_drawing_area_pressed(GdkEventButton * event, Gtk::DrawingArea *pArea) {
+    if(event->type == GDK_BUTTON_PRESS && event->button == 1) {
+        Gtk::Allocation allocation = pArea->get_allocation();
+        const int width = allocation.get_width();
+        const int height = allocation.get_height();
+        int col = event->x * b_size / width, row = event->y * b_size / height;
+        if(!cpuTurn && evalMove(b, row, col, player)) {
+            flipTiles(b, row, col, player);
+            fillGhosts();
+            cpuTurn = true;
+            pArea->queue_draw();
+
+            Glib::signal_timeout().connect(sigc::bind(sigc::mem_fun(*this, &GameLogic::do_ai_turn), pArea), ai_timeout);
+        }
+    }
 
     return true;
 }
