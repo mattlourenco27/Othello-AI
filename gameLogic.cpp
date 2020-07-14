@@ -12,6 +12,7 @@ GameLogic::GameLogic(const Glib::RefPtr<Gtk::Builder> &refBuilder):
     pWindow(nullptr),
     b_start(nullptr),
     w_start(nullptr),
+    pPieceCount(nullptr),
     b_size(8),
     b(new Board(b_size)),
     ghostChips(b_size * b_size),
@@ -26,6 +27,9 @@ GameLogic::GameLogic(const Glib::RefPtr<Gtk::Builder> &refBuilder):
     // get the window
     refBuilder->get_widget("app_window", pWindow);
     if(pWindow) {
+        // set the title
+        pWindow->set_title("Reversi - Click to place pieces");
+
         // connect the quit signal
         Gtk::Button* pButton = nullptr;
         refBuilder->get_widget("quit_button", pButton);
@@ -34,6 +38,9 @@ GameLogic::GameLogic(const Glib::RefPtr<Gtk::Builder> &refBuilder):
         // get the radio buttons
         refBuilder->get_widget("radio_black", b_start);
         refBuilder->get_widget("radio_white", w_start);
+
+        // get the piece count label
+        refBuilder->get_widget("num_pieces_label", pPieceCount);
 
         // draw the game board
         Gtk::DrawingArea* pArea = nullptr;
@@ -74,26 +81,6 @@ void GameLogic::fillGhosts() {
             ghostChips[row * b_size + col].p2legal = evalMove(b, row, col, P2);
         }
     }
-}
-
-// start the game
-int GameLogic::begin() {
-
-    //Count tiles of each player
-    int B = countColour(b, P1);
-    int W = countColour(b, P2);
-
-    if(B > W) {
-        std::cout << "B player wins.\n";
-    } else if(W > B){
-        std::cout << "W player wins.\n";
-    } else {
-        std::cout << "It's a tie.\n";
-    }
-    std::cout << "B: " << B << " W: " << W << std::endl;
-
-    std::cin >> player;
-    return EXIT_SUCCESS;
 }
 
 // drawing area override function
@@ -141,7 +128,6 @@ bool GameLogic::draw(const Cairo::RefPtr<Cairo::Context> &cr, Gtk::DrawingArea *
     // draw the pieces
     cr->save();
     cr->set_line_width(1.0);
-    bool p1turn = !(cpuTurn ^ (cpu == P1));
     for(int row = 0; row < b_size; row++) {
         for(int col = 0; col < b_size; col++) {
             char img = b->at(row, col);
@@ -155,12 +141,12 @@ bool GameLogic::draw(const Cairo::RefPtr<Cairo::Context> &cr, Gtk::DrawingArea *
                 cr->arc((col + 0.5) * col_width, (row + 0.5) * row_height, col_width * 0.4, 0, 2 * M_PI);
                 cr->fill();
             }
-            if(ghostChips[b_size * row + col].p1legal && p1turn) {
+            if(ghostChips[b_size * row + col].p1legal && !cpuTurn && player == P1) {
                 cr->set_source_rgba(0, 0, 0, 0.2);
                 cr->arc((col + 0.5) * col_width, (row + 0.5) * row_height, col_width * 0.4, 0, 2 * M_PI);
                 cr->fill();
             }
-            if(ghostChips[b_size * row + col].p2legal && !p1turn) {
+            if(ghostChips[b_size * row + col].p2legal && !cpuTurn && player == P2) {
                 cr->set_source_rgba(1.0, 1.0, 1.0, 0.2);
                 cr->arc((col + 0.5) * col_width, (row + 0.5) * row_height, col_width * 0.4, 0, 2 * M_PI);
                 cr->fill();
@@ -188,6 +174,7 @@ bool GameLogic::do_ai_turn(Gtk::DrawingArea *pArea) {
     std::pair<int, int> best = ai->findBestMove();
     flipTiles(b, best.first, best.second, cpu);
     fillGhosts();
+    update_stats();
 
     cpuTurn = !availableMove(b, player) && availableMove(b, cpu);
     return cpuTurn; // on return true timeout continues
@@ -203,6 +190,7 @@ bool GameLogic::on_drawing_area_pressed(GdkEventButton * event, Gtk::DrawingArea
         if(!cpuTurn && evalMove(b, row, col, player)) {
             flipTiles(b, row, col, player);
             fillGhosts();
+            update_stats();
             cpuTurn = true;
             pArea->queue_draw();
 
@@ -229,15 +217,25 @@ void GameLogic::on_restart_clicked(Gtk::DrawingArea *pArea) {
         player = P2;
         cpu = P1;
         cpuTurn = true;
-        Glib::signal_timeout().connect(sigc::bind(sigc::mem_fun(*this, &GameLogic::do_ai_turn), pArea), ai_timeout);
+        Glib::signal_timeout().connect(sigc::bind(sigc::mem_fun(*this, &GameLogic::do_ai_turn), pArea), 1);
     }
 
     delete ai;
     ai = new Ai(b, cpu);
     fillGhosts();
+    update_stats();
 }
 
 // delete the window
 void GameLogic::on_quit_clicked() {
     if(pWindow) pWindow->hide(); //hide() will cause main::run() to end.
+}
+
+// update the stats
+void GameLogic::update_stats() {
+    int b_score = countColour(b, P1), w_score = countColour(b, P2);
+    if(pPieceCount) {
+        pPieceCount->set_text("Black: " + std::to_string(b_score) + " piece" + (b_score == 1?"":"s") + "\n" +
+                              "White: " + std::to_string(w_score) + " piece" + (b_score == 1?"":"s"));
+    }
 }

@@ -29,68 +29,6 @@
           </packing>
         </child>
         <child>
-          <object class="GtkButtonBox" id="action_bar">
-            <property name="name">Action bar</property>
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="orientation">vertical</property>
-            <property name="spacing">3</property>
-            <property name="layout_style">start</property>
-            <child>
-              <object class="GtkButton" id="restart_button">
-                <property name="label" translatable="yes">Restart</property>
-                <property name="name">Restart button</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkRadioButton" id="radio_black">
-                <property name="label" translatable="yes">Begin as Black</property>
-                <property name="name">begin as black radio button</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">False</property>
-                <property name="active">True</property>
-                <property name="draw_indicator">True</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkRadioButton" id="radio_white">
-                <property name="label" translatable="yes">Begin as White</property>
-                <property name="name">begin as white radio button</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">False</property>
-                <property name="active">True</property>
-                <property name="draw_indicator">True</property>
-                <property name="group">radio_black</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="left_attach">2</property>
-            <property name="top_attach">0</property>
-            <property name="height">2</property>
-          </packing>
-        </child>
-        <child>
           <object class="GtkButtonBox" id="quit_box">
             <property name="name">Quit box</property>
             <property name="visible">True</property>
@@ -115,11 +53,12 @@
           </object>
           <packing>
             <property name="left_attach">2</property>
-            <property name="top_attach">2</property>
+            <property name="top_attach">1</property>
+            <property name="height">2</property>
           </packing>
         </child>
         <child>
-          <object class="GtkLabel" id="text_out_label">
+          <object class="GtkLabel" id="credits_label">
             <property name="name">Text display label</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
@@ -146,7 +85,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkSeparator" id="text_out_separator">
+          <object class="GtkSeparator" id="credits_separator">
             <property name="name">Text display separator</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
@@ -154,6 +93,108 @@
           <packing>
             <property name="left_attach">0</property>
             <property name="top_attach">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox" id="action_bar">
+            <property name="name">Action bar</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkButtonBox" id="action_bar_buttons">
+                <property name="name">Action bar buttons</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="valign">start</property>
+                <property name="orientation">vertical</property>
+                <property name="spacing">3</property>
+                <property name="layout_style">start</property>
+                <child>
+                  <object class="GtkButton" id="restart_button">
+                    <property name="label" translatable="yes">Restart</property>
+                    <property name="name">Restart button</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkRadioButton" id="radio_black">
+                    <property name="label" translatable="yes">Begin as Black</property>
+                    <property name="name">begin as black radio button</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="active">True</property>
+                    <property name="draw_indicator">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkRadioButton" id="radio_white">
+                    <property name="label" translatable="yes">Begin as White</property>
+                    <property name="name">begin as white radio button</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="draw_indicator">True</property>
+                    <property name="group">radio_black</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="stats_label">
+                <property name="name">stats label</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="margin_top">10</property>
+                <property name="label" translatable="yes">Stats:</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="num_pieces_label">
+                <property name="name">number of pieces display</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Black: 2 pieces
+White: 2 pieces</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="left_attach">2</property>
+            <property name="top_attach">0</property>
           </packing>
         </child>
       </object>

@@ -26,6 +26,9 @@ class GameLogic {
     // radio buttons
     Gtk::RadioButton *b_start, *w_start;
 
+    // piece count label
+    Gtk::Label* pPieceCount;
+
     // board size
     int b_size;
 
@@ -47,9 +50,6 @@ class GameLogic {
     // fills the ghost chips by determining legal moves for each player
     void fillGhosts();
 
-    // start the game
-    int begin();
-
     // drawing area override function
     bool draw(const Cairo::RefPtr<Cairo::Context> &cr, Gtk::DrawingArea *pArea);
 
@@ -64,6 +64,9 @@ class GameLogic {
 
     // delete the window
     void on_quit_clicked();
+
+    // update the stats
+    void update_stats();
 
 public:
     /* Constructor */
