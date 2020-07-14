@@ -9,6 +9,7 @@
 #include "board.h"
 #include <gtkmm.h>
 
+// struct to keep track of legal placements of chips
 struct plegal {
     bool p1legal, p2legal;
 
@@ -22,14 +23,17 @@ class GameLogic {
     // app window
     Gtk::Window* pWindow;
 
+    // radio buttons
+    Gtk::RadioButton *b_start, *w_start;
+
     // board size
     int b_size;
 
     // board object pointer
     Board* b;
 
-    // ai opponent
-    Ai ai;
+    // ai opponent pointer
+    Ai* ai;
 
     // colours representing each player
     char player, cpu;
@@ -54,6 +58,9 @@ class GameLogic {
 
     // handler for press of the drawing area
     bool on_drawing_area_pressed(GdkEventButton * event, Gtk::DrawingArea *pArea);
+
+    // restart the game
+    void on_restart_clicked(Gtk::DrawingArea *pArea);
 
     // delete the window
     void on_quit_clicked();

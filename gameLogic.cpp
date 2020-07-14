@@ -10,13 +10,15 @@
 // finish construction of the window and connect signals
 GameLogic::GameLogic(const Glib::RefPtr<Gtk::Builder> &refBuilder):
     pWindow(nullptr),
+    b_start(nullptr),
+    w_start(nullptr),
     b_size(8),
     b(new Board(b_size)),
     ghostChips(b_size * b_size),
     player(P1), // when the app launches the player is P1 by default
     cpu(P2),
     cpuTurn(false),
-    ai(b, P2)
+    ai(new Ai(b, P2))
 {
     // set up ghost chips
     fillGhosts();
@@ -29,6 +31,10 @@ GameLogic::GameLogic(const Glib::RefPtr<Gtk::Builder> &refBuilder):
         refBuilder->get_widget("quit_button", pButton);
         if(pButton) pButton->signal_clicked().connect( sigc::mem_fun(*this, &GameLogic::on_quit_clicked));
 
+        // get the radio buttons
+        refBuilder->get_widget("radio_black", b_start);
+        refBuilder->get_widget("radio_white", w_start);
+
         // draw the game board
         Gtk::DrawingArea* pArea = nullptr;
         refBuilder->get_widget("game_board", pArea);
@@ -36,15 +42,22 @@ GameLogic::GameLogic(const Glib::RefPtr<Gtk::Builder> &refBuilder):
             pArea->signal_draw().connect(sigc::bind(sigc::mem_fun(*this, &GameLogic::draw), pArea));
             pArea->add_events(Gdk::BUTTON_PRESS_MASK);
             pArea->signal_button_press_event().connect(sigc::bind(sigc::mem_fun(*this, &GameLogic::on_drawing_area_pressed), pArea));
-        }
 
+            // connect the restart signal
+            pButton = nullptr;
+            refBuilder->get_widget("restart_button", pButton);
+            if(pButton) pButton->signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &GameLogic::on_restart_clicked), pArea));
+        }
     }
 }
 
 /* Destructor */
 GameLogic::~GameLogic() {
     delete pWindow;
+    delete b_start;
+    delete w_start;
     delete b;
+    delete ai;
     ghostChips.clear();
 }
 
@@ -172,7 +185,7 @@ bool GameLogic::do_ai_turn(Gtk::DrawingArea *pArea) {
     }
 
     // choose best move and flip tiles for cpu
-    std::pair<int, int> best = ai.findBestMove();
+    std::pair<int, int> best = ai->findBestMove();
     flipTiles(b, best.first, best.second, cpu);
     fillGhosts();
 
@@ -198,6 +211,30 @@ bool GameLogic::on_drawing_area_pressed(GdkEventButton * event, Gtk::DrawingArea
     }
 
     return true;
+}
+
+// restart the game
+void GameLogic::on_restart_clicked(Gtk::DrawingArea *pArea) {
+    if(!b_start->get_active() && !w_start->get_active()) return;
+
+    delete b;
+    b = new Board(b_size);
+    pArea->queue_draw();
+
+    if(b_start->get_active()) {
+        player = P1;
+        cpu = P2;
+        cpuTurn = false;
+    } else {
+        player = P2;
+        cpu = P1;
+        cpuTurn = true;
+        Glib::signal_timeout().connect(sigc::bind(sigc::mem_fun(*this, &GameLogic::do_ai_turn), pArea), ai_timeout);
+    }
+
+    delete ai;
+    ai = new Ai(b, cpu);
+    fillGhosts();
 }
 
 // delete the window
