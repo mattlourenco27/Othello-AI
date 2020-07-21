@@ -178,35 +178,26 @@ std::pair<int, int> Ai::findBestMove() {
     }
 
     // find tile with desired score ratio and return its coordinates
-    int best, diff, i = 0;
+    int best, diff, min_player, i = 0;
 
     //find the first valid move
     while(true) {
         if(data[i].my > 0) {
             best = i;
             diff = data[best].my - data[best].op;
+            min_player = data[best].op;
             break;
         }
         i++;
         if(i == data.size()) throw no_generation();
     }
 
-    // std::cout << "best is init at " << best << " with diff " << diff << std::endl;
-
     for(i += 1; i < data.size(); i++) {
-        if(data[i].my > 0 && data[i].my - data[i].op > diff) {
+        if(data[i].my > 0 && data[i].op < min_player) {
             best = i;
-            diff = data[best].my - data[best].op;
+            min_player = data[i].op;
         }
     }
 
-    // print data
-    // std::cout << "[";
-    // for(int d = 0; d < data.size(); d++) {
-    //  std::cout << data[d];
-    //  if(d + 1 != data.size()) std::cout << ", ";
-    // }
-    // std::cout << "]" << std::endl;
-    // std::cout << "The best solution was at data " << best << std::endl;
     return std::make_pair(best / b->dim(), best % b->dim());
 }
